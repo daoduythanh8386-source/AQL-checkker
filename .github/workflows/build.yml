@@ -49,7 +49,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-     - name: Build Android APK
+      - name: Build Android APK
         run: |
           npx cap init "AQL Tra Cứu" vn.oristar.aqltracuu --web-dir=web --force
           npx cap add android
