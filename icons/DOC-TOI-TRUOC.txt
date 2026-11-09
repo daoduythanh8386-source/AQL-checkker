@@ -1,0 +1,9 @@
+ICON "AQL tra cuu" - LOGO ORISTAR 3D (bo icon tao san)
+
+master/    anh goc 1024 (bo goc va vuong) - dung de tao lai moi kich thuoc
+web-pwa/   icon-192, icon-512, icon-maskable-512, apple-touch-icon (iPhone), favicon
+android/   mipmap-mdpi...xxxhdpi (ic_launcher + ic_launcher_round), playstore-512
+ios/       AppIcon 20...1024 (khong trong suot, dung cho Xcode/App Store)
+windows/   icon.ico (16-256), icon-256, Square44/150, StoreLogo
+
+Ten app hien duoi icon: AQL tra cuu

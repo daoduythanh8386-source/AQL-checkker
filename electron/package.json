@@ -1,0 +1,40 @@
+{
+  "name": "aql-tra-cuu",
+  "productName": "AQL tra cứu",
+  "version": "1.0.0",
+  "description": "AQL tra cứu - Oristar: tra cỡ mẫu AQL và tính khối lượng lỗi trách nhiệm",
+  "author": "Oristar",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis portable --publish never"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "vn.oristar.aqltracuu",
+    "productName": "AQL tra cứu",
+    "directories": { "output": "dist", "buildResources": "build" },
+    "files": ["main.js", "app/**/*", "build/icon.png"],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": ["nsis", "portable"]
+    },
+    "nsis": {
+      "artifactName": "AQL-tra-cuu-Setup-${version}.${ext}",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "AQL tra cứu",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
+    },
+    "portable": {
+      "artifactName": "AQL-tra-cuu-Portable-${version}.${ext}"
+    }
+  }
+}

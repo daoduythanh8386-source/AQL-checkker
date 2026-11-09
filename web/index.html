@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>AQL tra cứu</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AQL tra cứu">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#1677ff">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&family=Chakra+Petch:wght@600;700&display=swap">
+<style>
+:root{
+  --bg:#eef1f6;--card:#fff;--ink:#14213d;--muted:#5b6780;--line:#cfd6e4;
+  --ap:#fbf1c4;--ap-ink:#6b4e00;--kt:#d5f0e6;--kt-ink:#0b5a40;--accent:#2f4fd8;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1523;--card:#182034;--ink:#e8ecf6;--muted:#97a3bd;--line:#2c3752;
+  --ap:#4a3d12;--ap-ink:#ffe28a;--kt:#12473a;--kt-ink:#8ff0cb;--accent:#8aa2ff;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1523;--card:#182034;--ink:#e8ecf6;--muted:#97a3bd;--line:#2c3752;
+  --ap:#4a3d12;--ap-ink:#ffe28a;--kt:#12473a;--kt-ink:#8ff0cb;--accent:#8aa2ff;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+main{max-width:480px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:22px;font-weight:800;margin:4px 0 2px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+label{display:block;font-weight:600;font-size:15px;margin-bottom:8px}
+#qty{width:100%;font-weight:800;font-size:40px;line-height:1.1;font-family:inherit;padding:12px 14px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-variant-numeric:tabular-nums}
+#qty:focus{outline:none;border-color:var(--accent)}
+.res{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.box{border-radius:12px;padding:14px 12px;min-height:128px;display:flex;flex-direction:column;justify-content:space-between}
+.box.ap{background:var(--ap);color:var(--ap-ink)}
+.box.kt{background:var(--kt);color:var(--kt-ink)}
+.box b{font-size:15px;font-weight:600}
+.num{font-size:56px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.box small{font-size:13px;opacity:.85}
+.err{color:#c0392b;font-size:14px;min-height:20px;margin:8px 0 0}
+details{margin-top:16px}
+summary{cursor:pointer;font-weight:600;color:var(--accent);padding:8px 0}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:600}
+tr.on td{background:var(--ap);color:var(--ap-ink);font-weight:600}
+.note{color:var(--muted);font-size:12.5px;margin-top:12px;line-height:1.5}
+.credit{margin-top:24px;padding-top:14px;border-top:1px solid var(--line);text-align:center;font-size:13px;color:var(--muted);line-height:1.6}
+.credit a{color:var(--accent);font-weight:600;text-decoration:none}
+footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:13px;line-height:1.6}
+footer a{color:var(--accent);font-weight:600;text-decoration:none}
+.install{font-size:13.5px;line-height:1.6;color:var(--muted);margin:0 0 6px}
+.install b{color:var(--ink)}
+footer{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);text-align:center;font-size:13.5px;color:var(--muted);line-height:1.7}
+footer a{color:var(--accent);font-weight:600;text-decoration:none}
+.dev{margin:22px 0 0;text-align:center;font-size:13px;white-space:nowrap;color:var(--muted)}.dev a{color:var(--accent);font-weight:600;text-decoration:none}
+h2{font-size:18px;font-weight:800;margin:0 0 12px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--bg);padding:4px;border-radius:12px;margin-bottom:14px}
+.seg button{font-weight:600;font-size:15px;font-family:inherit;border:0;border-radius:9px;padding:10px;background:transparent;color:var(--muted);cursor:pointer}
+.seg button.on{background:var(--accent);color:var(--bg)}
+.row{display:grid;grid-template-columns:1fr 84px;gap:8px;margin-bottom:12px}
+.row input,.row select,.qrow input{font-weight:700;font-size:20px;font-family:inherit;padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%;min-width:0;font-variant-numeric:tabular-nums}
+.row select{font-size:16px;padding:10px 6px}
+.row input:focus,.qrow input:focus{outline:none;border-color:var(--accent)}
+.qrow{margin-bottom:4px}
+.res1{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.box.one{background:var(--kt);color:var(--kt-ink);min-height:104px}
+.box.tot{background:var(--ap);color:var(--ap-ink);min-height:104px}
+.num2{font-size:30px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums;word-break:break-all}
+.btn{width:100%;margin-top:14px;font-weight:700;font-size:16px;font-family:inherit;border:0;border-radius:10px;padding:12px;background:var(--accent);color:var(--bg);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--line);margin-top:8px}
+.btn:disabled{opacity:.45;cursor:default}
+.list{margin-top:14px;font-size:14px;font-variant-numeric:tabular-nums}
+.li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+.li button{border:0;background:transparent;color:#c0392b;font-size:18px;cursor:pointer;padding:2px 8px}
+.sum{display:flex;justify-content:space-between;padding:12px 0 0;font-weight:800;font-size:16px}
+.mat{width:100%;font-weight:700;font-size:17px;font-family:inherit;padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);margin-bottom:12px}
+.mat:focus{outline:none;border-color:var(--accent)}
+
+html:root:root:root{--bg:#eaf4ff;--card:#fff;--ink:#0b2a55;--muted:#4f6f9c;--line:#c3dbf6;--accent:#1677ff;--ap:#dcebff;--ap-ink:#0a4aa8;--kt:#d4f5f2;--kt-ink:#06675c;color-scheme:light}
+body{background:linear-gradient(180deg,#cfe7ff 0,#eaf4ff 300px,#f5faff 100%) fixed;color:var(--ink);min-height:100vh}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 16px;padding:16px 14px 16px 20px;border:0;border-image:none;border-radius:20px;background:linear-gradient(135deg,#0d6efd 0%,#2b95ff 55%,#5cc3ff 100%);box-shadow:0 12px 28px rgba(13,110,253,.35),inset 0 1px 0 rgba(255,255,255,.45)}
+.top h1{color:#fff;font-size:21px;margin:0 0 4px;text-shadow:0 2px 6px rgba(0,40,120,.35)}
+.top .sub{color:rgba(255,255,255,.92);font-size:13.5px;line-height:1.45;margin:0}
+.logo{flex:0 0 auto;animation:float 4s ease-in-out infinite}
+.logo svg{display:block;width:84px;height:84px;filter:drop-shadow(0 10px 12px rgba(0,30,100,.5))}
+@keyframes float{0%,100%{translate:0 0}50%{translate:0 -4px}}
+@media (prefers-reduced-motion:reduce){.logo{animation:none}}
+h2{color:var(--ink)}
+.card{background:#fff;border:1px solid #cfe3fa;border-top:3px solid var(--accent);box-shadow:0 8px 24px rgba(22,119,255,.12)}
+.box{border:0;box-shadow:inset 0 0 0 1px rgba(22,119,255,.12)}
+.box.ap,.box.tot{background:var(--ap);color:var(--ap-ink)}
+.box.kt,.box.one{background:var(--kt);color:var(--kt-ink)}
+.num,.num2{text-shadow:none}
+#qty,.row input,.row select,.qrow input,.mat{background:#f3f9ff;color:var(--ink);border-color:var(--line)}
+.seg{background:#e3f0ff;border:0}
+.seg button.on,.btn{background:linear-gradient(180deg,#3aa0ff,#1677ff);color:#fff;box-shadow:0 4px 0 #0b57c4}
+.btn.ghost{background:transparent;color:var(--accent);box-shadow:none}
+tr.on td{background:var(--ap);color:var(--ap-ink)}
+
+.ib{display:flex;flex-direction:column;gap:12px;padding:14px 16px;margin-bottom:16px;border-top-color:#ff9f1c}
+.ib[hidden]{display:none}
+.ib-t{display:flex;gap:12px;align-items:center}
+.ib-t img{width:48px;height:48px;border-radius:12px;box-shadow:0 4px 10px rgba(0,40,120,.25);flex:0 0 auto}
+.ib-t b{display:block;font-size:15.5px;line-height:1.35;color:var(--ink)}
+.ib-t span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.ib-b{display:flex;gap:10px}
+.ibtn{flex:1;border:0;border-radius:12px;padding:12px 10px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;background:linear-gradient(180deg,#3aa0ff,#1677ff);color:#fff;box-shadow:0 4px 0 #0b57c4}
+.ibtn.g{flex:0 0 auto;background:#e3f0ff;color:var(--accent);box-shadow:none}
+.gtabs{display:flex;gap:6px;margin:8px 0 14px}
+.gtabs button{flex:1;border:1px solid var(--line);background:#f3f9ff;color:var(--ink);border-radius:10px;padding:9px 4px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.gtabs button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.gs{margin:0 0 20px;text-align:center}
+.gs svg{display:block;margin:0 auto 8px;width:100%;max-width:230px;height:auto;background:#f3f9ff;border-radius:18px}
+.gs svg.w{max-width:340px}
+.gs h4{margin:6px 0 4px;font-size:16px;color:var(--ink);text-align:left}
+.gs h4 i{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-style:normal;font-size:13px;margin-right:8px}
+.gs p{margin:0;font-size:14px;line-height:1.55;color:var(--muted);text-align:left}
+@keyframes pl{50%{stroke-opacity:.3}}
+.hl{animation:pl 1.2s ease-in-out infinite}
+
+/* ===== v5: chữ to, bàn phím riêng, kết quả to ===== */
+label{font-size:16px}
+.row{grid-template-columns:1fr 96px;align-items:stretch}
+.row input,.qrow input{font-size:30px;font-weight:800;padding:12px 14px;min-height:64px;border-radius:12px}
+.row select{font-size:20px;font-weight:700;padding:10px 8px;border-radius:12px;min-height:64px;border:2px solid var(--line);background:#f3f9ff;color:var(--ink)}
+.unit{display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:var(--accent);background:#e3f0ff;border-radius:12px}
+.mat{font-size:19px;min-height:60px}
+.seg button{font-size:18px;padding:13px}
+.kp.kp-on,.row input.kp-on,.qrow input.kp-on,#qty.kp-on{border-color:var(--accent);box-shadow:0 0 0 4px rgba(22,119,255,.22)}
+.res2{display:grid;gap:12px;margin-top:16px}
+.bx{border-radius:16px;padding:14px 16px 12px;position:relative;box-shadow:inset 0 0 0 1px rgba(22,119,255,.12)}
+.bx.tot{background:var(--ap);color:var(--ap-ink)}
+.bx.one{background:var(--kt);color:var(--kt-ink)}
+.bx b{display:block;font-size:16px;font-weight:700;padding-right:96px}
+.bx .bn{display:block;font-size:58px;font-weight:800;line-height:1.08;font-variant-numeric:tabular-nums;word-break:break-all;margin:6px 0 2px}
+.bx.one .bn{font-size:40px}
+.bx small{font-size:14px;opacity:.9}
+.cp{position:absolute;top:10px;right:10px;border:0;border-radius:10px;padding:9px 12px;font-weight:700;font-size:14px;font-family:inherit;background:rgba(255,255,255,.8);color:inherit;cursor:pointer}
+.calc{margin:10px 0 0;font-size:13px;line-height:1.55;color:var(--muted);font-variant-numeric:tabular-nums;word-break:break-word}
+.list{font-size:15px}
+.li button.c{color:var(--accent);font-size:13px;font-weight:700;border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-left:auto}
+.li .x{color:#c0392b}
+.sum{font-size:20px;align-items:center}
+.sum .cp2{border:1px solid var(--line);background:#fff;color:var(--accent);font-weight:700;font-size:13px;font-family:inherit;border-radius:8px;padding:6px 10px;margin-left:8px;cursor:pointer}
+.kp-sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#f3f9ff;border-top:1px solid var(--line);box-shadow:0 -12px 32px rgba(11,42,85,.28);padding:10px 10px calc(10px + env(safe-area-inset-bottom,0px));border-radius:20px 20px 0 0;user-select:none;-webkit-user-select:none}
+.kp-sheet[hidden]{display:none}
+.kp-in{max-width:480px;margin:0 auto}
+.kp-top{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;padding:2px 6px 10px}
+.kp-lab{font-size:13px;color:var(--muted);font-weight:600}
+.kp-val{font-size:32px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;min-height:38px;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kp-live{text-align:right;font-size:14px;color:var(--ap-ink);font-weight:800;background:var(--ap);padding:7px 11px;border-radius:12px;max-width:52%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums}
+.kp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.kp-grid button{height:60px;border:0;border-radius:14px;background:#fff;color:var(--ink);font-weight:800;font-size:30px;font-family:inherit;box-shadow:0 3px 0 #b9d3f0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer}
+.kp-grid button:active{transform:translateY(2px);box-shadow:0 1px 0 #b9d3f0}
+.kp-grid .f{background:#dcebff;color:var(--accent)}
+.kp-grid .go{background:linear-gradient(180deg,#3aa0ff,#1677ff);color:#fff;box-shadow:0 3px 0 #0b57c4;font-size:21px;grid-column:span 2}
+.kp-grid button:disabled{opacity:.3;box-shadow:none}
+body.kpo main{padding-bottom:400px}
+.seg.s3{grid-template-columns:repeat(3,1fr)}
+.seg.s3 button{padding:13px 4px}
+
+/* ===== v8: header có ảnh sản phẩm + logo Oristar, chống zoom khi chạm ô nhập ===== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation}
+input,select,textarea{font-size:16px}
+
+
+.decsw{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--muted);font-weight:600;flex-wrap:wrap}
+.decsw button{border:2px solid var(--line);background:#fff;color:var(--accent);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer}
+.decsw button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ===== v9: header 3D, sản phẩm làm nền ===== */
+.top.hero{position:relative;display:block;overflow:hidden;min-height:236px;padding:14px;isolation:isolate}
+.hero .scene{position:absolute;inset:0;perspective:650px;perspective-origin:62% 72%;pointer-events:none;z-index:0}
+.hero .glow{position:absolute;right:-12%;bottom:-30%;width:95%;height:100%;background:radial-gradient(closest-side,rgba(255,255,255,.55),rgba(160,215,255,.18) 55%,rgba(255,255,255,0) 100%)}
+.hero .stage{position:absolute;right:0;bottom:6px;width:96%;aspect-ratio:1642/855;transform-style:preserve-3d;will-change:transform;transform:rotateX(0) rotateY(0)}
+.hero .ly{position:absolute;display:block;max-width:none;height:auto;pointer-events:none;user-select:none;-webkit-user-drag:none;backface-visibility:hidden}
+.hero .l0{left:0;top:0;width:100%;filter:drop-shadow(0 8px 10px rgba(0,25,90,.35))}
+.hero .l1{left:.3%;top:21.99%;width:71.07%;transform-origin:69.9% 43.4%;transform:translateZ(22px) scale(.966)}
+.hero .l2{left:40.44%;top:35.67%;width:59.56%;transform-origin:16.05% 22.3%;transform:translateZ(48px) scale(.926)}
+.hero .gs{position:absolute;left:6%;right:0;bottom:-4%;height:13%;background:radial-gradient(closest-side,rgba(0,20,80,.5),rgba(0,20,80,0));filter:blur(3px);transform:translateZ(-10px)}
+.hero .shine{position:absolute;inset:0;transform:translateZ(52px) scale(.92);-webkit-mask:url(sp-0.webp) center/100% 100% no-repeat;mask:url(sp-0.webp) center/100% 100% no-repeat;background:linear-gradient(112deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.55) 50%,rgba(255,255,255,0) 60%);background-size:280% 100%;background-position:120% 0;animation:glint 6s ease-in-out infinite 1s}
+@keyframes glint{0%{background-position:120% 0}55%,100%{background-position:-20% 0}}
+.hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(5,45,140,.78) 0,rgba(5,45,140,.5) 26%,rgba(5,45,140,0) 46%)}
+.hero .tr{position:relative;z-index:2;display:flex;align-items:center;gap:12px}
+.hero .tt{min-width:0;display:flex;flex-direction:column;gap:3px}
+.hero .logo{animation:none;background:#fff;border-radius:12px;padding:6px 9px;box-shadow:0 6px 14px rgba(0,30,100,.3)}
+.hero .logo{flex:none}.hero .logo img{display:block;width:86px;height:auto}
+.hero h1{font-size:19px;margin:0;line-height:1.15;white-space:nowrap;text-shadow:0 2px 8px rgba(0,20,80,.45)}
+.hero .sub{font-size:11px;line-height:1.35;text-shadow:0 1px 6px rgba(0,20,80,.5)}
+@media (max-width:370px){.hero .sub{font-size:10px}}
+@media (prefers-reduced-motion:reduce){.hero .shine{animation:none;opacity:0}}
+
+/* ===== v10: tab Tấm / Cuộn / Thanh, chống zoom ===== */
+.seg.s3{grid-template-columns:repeat(3,1fr)}
+.panel[hidden]{display:none}
+.hint{margin:0 0 6px;font-size:13px;line-height:1.45;color:var(--muted)}
+html,body{touch-action:pan-x pan-y}
+button,input,select,label,.kp-sheet{touch-action:manipulation}
+
+/* ===================== v12: bố cục chuyên nghiệp + màu kim loại ===================== */
+main{max-width:480px;padding:max(24px,calc(env(safe-area-inset-top,0px) + 14px)) 16px 44px}
+.layout{display:block}
+.col-a,.col-b{min-width:0}
+.col-b .card.calc{margin-top:16px!important}
+
+/* ---- Hero ---- */
+.top.hero{min-height:306px;padding:16px;border-radius:26px;margin-bottom:18px;
+  background:radial-gradient(110% 80% at 80% 92%,rgba(120,205,255,.85) 0%,rgba(120,205,255,0) 62%),linear-gradient(160deg,#0a3aa8 0%,#0f5fe6 50%,#2b8fff 100%);
+  box-shadow:0 20px 44px rgba(10,58,168,.28),inset 0 1px 0 rgba(255,255,255,.28)}
+.top.hero::after{content:none}
+.top.hero::before{content:"";position:absolute;left:0;right:0;bottom:0;height:36%;z-index:0;background:linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,.16));pointer-events:none}
+.hero .stage{right:0;bottom:14px;width:100%}
+.hero .glow{right:-8%;bottom:-24%;width:100%;height:96%}
+.hero .tr{position:relative;z-index:2;display:flex;align-items:center;gap:12px;max-width:none}
+.hero .logo{flex:none;padding:7px 10px;border-radius:13px;background:#fff;box-shadow:0 8px 18px rgba(0,25,90,.32)}
+.hero .logo img{display:block;width:96px;height:auto}
+.hero .tt{min-width:0}
+.hero h1{font-size:21px;margin:0;letter-spacing:.2px}
+.hero .sub{font-size:11.5px;margin:2px 0 0;text-wrap:balance}
+.hero .chips{display:none}
+.chips{list-style:none;margin:0;padding:0}
+.sw{display:inline-block;width:14px;height:14px;border-radius:50%;flex:none;box-shadow:inset 0 -2px 3px rgba(0,0,0,.28),0 1px 2px rgba(0,0,0,.3)}
+.sw.al{background:radial-gradient(circle at 35% 30%,#fff,#d6dee9 45%,#8497ac)}
+.sw.cu{background:radial-gradient(circle at 35% 30%,#ffe3c6,#ea9a5e 45%,#9a4d1e)}
+.sw.ix{background:radial-gradient(circle at 35% 30%,#f4f8fc,#aebdcd 40%,#586f86)}
+
+/* ---- Màu kim loại theo tab ---- */
+.calc{--m1:#fcfdfe;--m2:#e8edf2;--m3:#c2cdd9;--m4:#f5f8fb;--mink:#27384b;--macc:#8195ab;--mglow:rgba(129,149,171,.38);--b1:#7b91a8;--b2:#465c74;--bs:#2f4358}
+.calc[data-k="c"]{--m1:#ffdcbd;--m2:#eca476;--m3:#b2602a;--m4:#f4be93;--mink:#4a210a;--macc:#c4682c;--mglow:rgba(196,104,44,.4);--b1:#e08a4c;--b2:#9d4c1c;--bs:#6e3410}
+.calc[data-k="h"]{--m1:#e7eef6;--m2:#aebdcd;--m3:#60778f;--m4:#c6d3e1;--mink:#0d1927;--macc:#4f677f;--mglow:rgba(79,103,127,.42);--b1:#62788f;--b2:#34485c;--bs:#222f3e}
+.card.calc{border-top:4px solid var(--macc);box-shadow:0 14px 34px var(--mglow);transition:box-shadow .3s,border-color .3s}
+.calc .seg{background:linear-gradient(180deg,#f3f6fa,#d7e0ea);box-shadow:inset 0 1px 3px rgba(20,40,70,.18);padding:5px;gap:6px;border-radius:16px}
+.calc .seg button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:64px;padding:8px 4px;border-radius:12px;background:transparent;box-shadow:none;color:#51647a;transition:background .25s,box-shadow .25s,transform .2s}
+.calc .seg button:active{transform:scale(.97)}
+#k-t{--p1:#2f4158;--p2:#111b2a;--rim:#c8d4e2;--c1:#fff;--c2:#eaf0f7;--c3:#8aa0b8;--c4:#e0e9f2;--c5:#b4c3d4;--e1:#7d8ea3;--e2:#5f7087;--e3:#42536a;--glow:rgba(170,190,214,.6)}
+#k-c{--p1:#4c2611;--p2:#1d0e05;--rim:#eba56f;--c1:#fff2e2;--c2:#ffc794;--c3:#9e5020;--c4:#f6ab73;--c5:#d0803f;--e1:#9c5226;--e2:#753d1b;--e3:#532912;--glow:rgba(232,140,76,.65)}
+#k-h{--p1:#283a4e;--p2:#0a131e;--rim:#a0b5ca;--c1:#fff;--c2:#dce7f3;--c3:#5c7490;--c4:#d0deec;--c5:#8ea5bd;--e1:#566b82;--e2:#3c4e63;--e3:#293a4c;--glow:rgba(120,162,208,.65)}
+.t3d{position:relative;display:inline-block;white-space:nowrap;font-weight:800;font-size:19px;letter-spacing:.3px;line-height:1.15;text-rendering:geometricPrecision;-webkit-font-smoothing:antialiased;text-shadow:0 1px 0 rgba(255,255,255,.85)}
+.calc .seg button.on{background:linear-gradient(180deg,var(--p1),var(--p2));box-shadow:0 0 0 2px var(--rim),0 10px 24px var(--glow),inset 0 1px 0 rgba(255,255,255,.3);transform:translateY(-1px)}
+.calc .seg button.on .t3d{font-size:25px;font-weight:900;letter-spacing:.4px;text-shadow:none;color:transparent;-webkit-text-fill-color:transparent;
+  background:linear-gradient(180deg,var(--c1) 0%,var(--c2) 38%,var(--c3) 50%,var(--c4) 53%,var(--c5) 100%);-webkit-background-clip:text;background-clip:text;
+  filter:drop-shadow(0 .5px 0 var(--e1)) drop-shadow(0 .5px 0 var(--e1)) drop-shadow(0 .5px 0 var(--e2)) drop-shadow(0 .5px 0 var(--e2)) drop-shadow(0 .5px 0 var(--e3)) drop-shadow(0 .5px 0 var(--e3)) drop-shadow(0 7px 5px rgba(0,0,0,.45));
+  animation:pop3d .55s cubic-bezier(.2,1.6,.4,1) both}
+.calc .seg button.on .t3d::after{content:attr(data-t);position:absolute;left:0;top:0;width:100%;height:100%;
+  background:linear-gradient(105deg,rgba(255,255,255,0) 36%,rgba(255,255,255,.98) 50%,rgba(255,255,255,0) 64%);background-size:280% 100%;background-position:160% 0;
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:sweep3d 3.4s ease-in-out infinite .5s}
+.calc .seg button.on .sw{display:none}
+@keyframes pop3d{0%{transform:scale(.7) translateY(6px);opacity:.2}60%{transform:scale(1.14)}100%{transform:scale(1);opacity:1}}
+@keyframes sweep3d{0%{background-position:160% 0}45%,100%{background-position:-60% 0}}
+.calc .bx.tot{color:var(--mink);border:1px solid var(--macc);
+  background:repeating-linear-gradient(100deg,rgba(255,255,255,.26) 0 1px,rgba(255,255,255,0) 1px 3px),linear-gradient(135deg,var(--m1) 0%,var(--m2) 44%,var(--m3) 51%,var(--m4) 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75),inset 0 -3px 8px rgba(0,0,0,.14),0 8px 18px var(--mglow)}
+.calc .bx.tot .bn{text-shadow:0 1px 0 rgba(255,255,255,.7),0 -1px 0 rgba(0,0,0,.12)}
+.calc .bx.tot .cp{background:rgba(255,255,255,.72);color:var(--mink)}
+.calc .unit{background:var(--m4);color:var(--mink)}
+.calc .row input:focus,.calc .qrow input:focus,.calc input.kp-on{border-color:var(--macc);box-shadow:0 0 0 4px var(--mglow)}
+.calc .btn{background:linear-gradient(180deg,var(--b1),var(--b2));color:#fff;box-shadow:0 4px 0 var(--bs),0 10px 18px var(--mglow)}
+.calc .btn:disabled{opacity:.55}
+.calc .btn.ghost{background:transparent;color:var(--macc);box-shadow:inset 0 0 0 2px var(--macc)}
+.calc .decsw button.on{background:var(--macc);border-color:var(--macc);color:#fff}
+.calc .decsw button{color:var(--macc)}
+.calc .li button.c,.calc .sum .cp2{color:var(--macc)}
+
+/* ---- Máy tính bảng ---- */
+@media (min-width:600px) and (max-width:899px){
+  main{max-width:660px}
+  .calc .seg button.on .t3d{font-size:32px}
+  .t3d{font-size:22px}
+  .top.hero{min-height:420px;padding:22px}
+  .hero .logo img{width:128px}
+  .hero h1{font-size:28px}
+  .hero .sub{font-size:14px}
+}
+/* ---- Máy tính ---- */
+@media (min-width:900px){
+  main{max-width:1160px;padding:34px 32px 70px}
+  .top.hero{min-height:420px;padding:0;border-radius:34px;margin-bottom:26px;
+    background:radial-gradient(70% 90% at 72% 70%,rgba(130,210,255,.8) 0%,rgba(130,210,255,0) 62%),linear-gradient(150deg,#082f94 0%,#0d57dc 52%,#2b8fff 100%)}
+  .hero .stage{right:2.5%;bottom:34px;width:58%}
+  .hero .glow{right:0;width:70%}
+  .hero .tr{height:100%;min-height:420px;flex-direction:column;align-items:flex-start;justify-content:center;gap:20px;padding:40px 0 40px 56px;max-width:44%}
+  .hero .logo{padding:13px 20px;border-radius:20px}
+  .hero .logo img{width:220px}
+  .hero h1{font-size:44px;line-height:1.05;letter-spacing:-.8px;white-space:normal}
+  .hero .sub{font-size:18px;line-height:1.5;max-width:360px;margin-top:10px}
+  .hero .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .hero .chips li{display:inline-flex;align-items:center;gap:9px;padding:8px 13px;border-radius:999px;font-weight:700;font-size:13px;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.34);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  .layout{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:26px;align-items:start}
+  .col-b .card.calc{margin-top:0!important}
+  .card{padding:22px}
+  .calc .seg button{min-height:74px}
+  .calc .seg button.on .t3d{font-size:36px}
+  .t3d{font-size:22px}
+  .bx .bn{font-size:64px}
+}
+@media (prefers-reduced-motion:reduce){.calc .seg button.on .t3d,.calc .seg button.on .t3d::after{animation:none}}
+
+
+/* ===== v14: nút bật/tắt giọng nói (một nút duy nhất) ===== */
+.vbtn{position:absolute;top:12px;right:12px;z-index:6;display:flex;align-items:center;justify-content:center;gap:8px;width:44px;height:44px;padding:0;border-radius:999px;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.2);color:#fff;font-family:inherit;font-weight:700;font-size:14px;line-height:1;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 6px 16px rgba(0,25,90,.3);transition:transform .15s,background .2s,color .2s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.vbtn:active{transform:scale(.92)}
+.vbtn:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.vbtn svg{width:22px;height:22px;display:block;overflow:visible;flex:none}
+.vbtn .wv path,.vbtn .xx{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.vbtn .wv,.vbtn .xx{transition:opacity .2s}
+.vbtn .vl{display:none}
+.vbtn:not(.on) .wv{opacity:0}
+.vbtn.on .xx{opacity:0}
+.vbtn.on{background:#fff;color:#0f5fe6;border-color:#fff}
+.vbtn.on .wv path:first-child{animation:vwave 1s ease-in-out infinite}
+.vbtn.on .wv path:last-child{animation:vwave 1s ease-in-out infinite .25s}
+@keyframes vwave{0%,100%{opacity:.3}50%{opacity:1}}
+.vbtn.nudge::after{content:"";position:absolute;inset:-5px;border-radius:inherit;border:2px solid rgba(255,255,255,.85);animation:vring 1.6s ease-out 4}
+@keyframes vring{0%{transform:scale(.88);opacity:.9}100%{transform:scale(1.3);opacity:0}}
+.vhint{position:absolute;top:64px;right:12px;z-index:6;max-width:210px;padding:8px 12px;border-radius:12px;background:rgba(255,255,255,.96);color:#0d3a8a;font-size:13px;font-weight:600;line-height:1.35;box-shadow:0 8px 20px rgba(0,25,90,.28)}
+.vhint[hidden]{display:none}
+@media (max-width:899px){.hero .tt{padding-right:46px}}
+@media (min-width:900px){.vbtn{top:20px;right:20px;width:auto;height:48px;padding:0 18px}.vbtn .vl{display:inline}.vhint{top:78px;right:20px;font-size:14px}}
+@media (prefers-reduced-motion:reduce){.vbtn.on .wv path,.vbtn.nudge::after{animation:none}}
+
+/* ===== v16: chân trang chữ to hơn ===== */
+.dev{margin:26px 0 0;padding-top:16px;border-top:1px solid var(--line);text-align:center;font-size:17px;line-height:1.7;font-weight:600;white-space:normal;text-wrap:balance;color:#4a6285}
+.dev .nm{white-space:nowrap}
+.dev a{display:block;margin-top:2px;font-size:20px;font-weight:800;color:var(--accent);text-decoration:none;white-space:nowrap}
+@media (min-width:900px){.dev{font-size:19px;margin-top:34px}.dev a{display:inline-block;margin:0 0 0 8px;font-size:21px}}
+</style>
+</head>
+<body>
+<main>
+  <header class="top hero" id="hero">
+    
+        <div class="scene" aria-hidden="true">
+      <div class="glow"></div>
+      <div class="stage" id="stage">
+        <div class="gs"></div>
+        <img class="ly l0" src="sp-0.webp" srcset="sp-0.webp 1200w, sp-0-hd.webp 1642w" sizes="(min-width:900px) 700px, 100vw" alt="" width="1642" height="855" decoding="async" fetchpriority="high">
+        <img class="ly l1" src="sp-1.webp" srcset="sp-1.webp 853w, sp-1-hd.webp 1167w" sizes="(min-width:900px) 500px, 72vw" alt="" width="1167" height="552" decoding="async">
+        <img class="ly l2" src="sp-2.webp" srcset="sp-2.webp 715w, sp-2-hd.webp 978w" sizes="(min-width:900px) 420px, 60vw" alt="" width="978" height="550" decoding="async">
+        <div class="shine"></div>
+      </div>
+    </div>
+    <div class="tr">
+      <div class="logo"><img src="logo-oristar.svg" alt="ORISTAR" width="1430" height="577"></div>
+      <div class="tt">
+        <h1>AQL tra cứu</h1>
+        <p class="sub">Nhập số lượng lô, ra cỡ mẫu kiểm tra.</p>
+        <ul class="chips" aria-hidden="true"><li><i class="sw al"></i>Tấm · Nhôm</li><li><i class="sw cu"></i>Cuộn · Đồng</li><li><i class="sw ix"></i>Thanh · Inox</li></ul>
+      </div>
+    </div>
+  
+    <button type="button" class="vbtn" id="vbtn" aria-pressed="false" aria-label="Bật giọng nói" title="Bật / tắt giọng nói">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.6L12 18.5v-13L7.6 9.5H4z" fill="currentColor"/><g class="wv"><path d="M15.2 9a4.2 4.2 0 0 1 0 6"/><path d="M17.8 6.6a7.6 7.6 0 0 1 0 10.8"/></g><path class="xx" d="M16 9.5l5 5m0-5l-5 5"/></svg>
+      <span class="vl" id="vl">Bật tiếng</span>
+    </button>
+    <div class="vhint" id="vhint" role="status" hidden>Chạm vào màn hình để nghe lời chào</div>
+  </header>
+  <div class="layout"><div class="col-a">
+  <div class="card ib" id="ib" hidden>
+    <div class="ib-t"><img src="icon-192.png" alt="" width="48" height="48"><div><b>Bạn có muốn cài ứng dụng ra màn hình chính không?</b><span>Mở nhanh như app thật, bấm là dùng.</span></div></div>
+    <div class="ib-b"><button class="ibtn" id="ibGo" type="button">Cài ngay</button><button class="ibtn g" id="ibNo" type="button">Để sau</button></div>
+  </div>
+  <div class="card">
+    <label for="qty">Số lượng</label>
+    <input id="qty" class="kp" data-int="1" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="vd: 1000" autocomplete="off">
+    <p class="err" id="err" aria-live="polite"></p>
+    <div class="res">
+      <div class="box ap"><b>Ngoại quan</b><span class="num" id="ap">–</span><small id="apc">Mức II · mã –</small></div>
+      <div class="box kt"><b>Kích thước</b><span class="num" id="kt">–</span><small id="ktc">Mức S-2 · mã –</small></div>
+    </div>
+  </div>
+  </div><div class="col-b">
+  <section class="card calc" id="calc" data-k="t">
+    <div class="seg s3" role="tablist">
+      <button type="button" id="k-t" role="tab" class="on" aria-selected="true"><i class="sw al"></i><span class="t3d" data-t="Tấm">Tấm</span></button>
+      <button type="button" id="k-c" role="tab" aria-selected="false"><i class="sw cu"></i><span class="t3d" data-t="Cuộn">Cuộn</span></button>
+      <button type="button" id="k-h" role="tab" aria-selected="false"><i class="sw ix"></i><span class="t3d" data-t="Thanh">Thanh</span></button>
+    </div>
+    <div class="panel" id="p-t">
+      <p class="hint">Tấm: nhập độ dày, cạnh nhỏ nhất của tấm lỗi và số tấm lỗi.</p>
+      <label for="mat-t">Vật liệu</label>
+      <select id="mat-t" class="mat"><option value="2.73" data-n="Nhôm">Nhôm (2,73 g/cm³)</option><option value="8.96" data-n="Đồng">Đồng đỏ (8,96 g/cm³)</option><option value="8.5" data-n="Đồng thau">Đồng thau / brass (8,50 g/cm³)</option><option value="8.8" data-n="Đồng thanh">Đồng thanh / bronze (8,80 g/cm³)</option><option value="7.93" data-n="Inox 304">Inox 304 (7,93 g/cm³)</option><option value="7.98" data-n="Inox 316">Inox 316 (7,98 g/cm³)</option><option value="7.7" data-n="Inox 430">Inox 430 (7,70 g/cm³)</option><option value="7.85" data-n="Thép">Thép carbon (7,85 g/cm³)</option><option value="7.2" data-n="Gang">Gang (7,20 g/cm³)</option><option value="7.14" data-n="Kẽm">Kẽm (7,14 g/cm³)</option><option value="8.9" data-n="Niken">Niken (8,90 g/cm³)</option><option value="4.51" data-n="Titan">Titan (4,51 g/cm³)</option><option value="11.34" data-n="Chì">Chì (11,34 g/cm³)</option><option value="custom" data-n="Tự nhập">Khác (tự nhập khối lượng riêng)</option></select>
+      <div id="drw-t" hidden><label for="dr-t">Khối lượng riêng</label>
+        <div class="row"><input id="dr-t" class="kp" type="text" inputmode="decimal" placeholder="vd: 7,85" autocomplete="off"><span class="unit">g/cm³</span></div></div>
+      <label for="dt-t">Độ dày</label>
+      <div class="row"><input id="dt-t" class="kp" type="text" inputmode="decimal" placeholder="vd: 2" autocomplete="off"><span class="unit">mm</span></div>
+      <label for="dm-t">Kích thước nhỏ nhất</label>
+      <div class="row"><input id="dm-t" class="kp" type="text" inputmode="decimal" placeholder="vd: 150" autocomplete="off"><select id="dmu-t"><option value="1" selected>mm</option><option value="10">cm</option><option value="1000">m</option></select></div>
+      <label for="dn-t">Số tấm lỗi</label>
+      <div class="qrow"><input id="dn-t" class="kp" data-int="1" type="text" inputmode="numeric" value="1" autocomplete="off"></div>
+      <div class="res2"><div class="bx tot"><b>Khối lượng lỗi trách nhiệm</b><span class="bn" id="tot-t">–</span><small>kg · làm tròn 2 số thập phân</small><button type="button" class="cp" data-c="t">Sao chép</button></div></div>
+      <p class="calc" id="calc-t"></p>
+      <button type="button" class="btn" id="add-t" disabled>+ Thêm vào danh sách</button>
+      <div class="list" id="list-t"></div>
+      <button type="button" class="btn ghost" id="clr-t" style="display:none">Xóa danh sách</button>
+      <p class="note">Công thức: <b>10 × độ dày × kích thước nhỏ nhất × số lượng lỗi × khối lượng riêng ÷ 1.000.000</b> (độ dày tính bằng mm, kích thước nhỏ nhất chọn mm, cm hoặc m, kết quả bằng kg). Nhôm dùng 2,73 g/cm³. App tính chính xác rồi <b>làm tròn 2 chữ số sau dấu thập phân</b> mới hiện kết quả, số hiện ra là số để nhập luôn. Gõ dấu , hoặc . đều được.</p>
+    </div>
+    <div class="panel" id="p-c" hidden>
+      <p class="hint">Xẻ cuộn: nhập độ dày và độ rộng dải lỗi để tính khối lượng lỗi trách nhiệm.</p>
+      <label for="mat-c">Vật liệu (đồng)</label>
+      <select id="mat-c" class="mat"><option value="8.96" data-n="Đồng đỏ">Đồng đỏ (8,96 g/cm³)</option><option value="8.5" data-n="Đồng thau">Đồng thau / brass (8,50 g/cm³)</option><option value="8.8" data-n="Đồng thanh">Đồng thanh / bronze (8,80 g/cm³)</option><option value="custom" data-n="Tự nhập">Khác (tự nhập khối lượng riêng)</option></select>
+      <div id="drw-c" hidden><label for="dr-c">Khối lượng riêng</label>
+        <div class="row"><input id="dr-c" class="kp" type="text" inputmode="decimal" placeholder="vd: 8,96" autocomplete="off"><span class="unit">g/cm³</span></div></div>
+      <label for="dt-c">Độ dày</label>
+      <div class="row"><input id="dt-c" class="kp" type="text" inputmode="decimal" placeholder="vd: 0,5" autocomplete="off"><span class="unit">mm</span></div>
+      <label for="dm-c">Độ rộng dải lỗi</label>
+      <div class="row"><input id="dm-c" class="kp" type="text" inputmode="decimal" placeholder="vd: 20" autocomplete="off"><select id="dmu-c"><option value="1" selected>mm</option><option value="10">cm</option><option value="1000">m</option></select></div>
+      <div class="res2"><div class="bx tot"><b>Khối lượng lỗi trách nhiệm xẻ cuộn</b><span class="bn" id="tot-c">–</span><small>kg · làm tròn 2 số thập phân</small><button type="button" class="cp" data-c="c">Sao chép</button></div></div>
+      <p class="calc" id="calc-c"></p>
+      <button type="button" class="btn" id="add-c" disabled>+ Thêm vào danh sách</button>
+      <div class="list" id="list-c"></div>
+      <button type="button" class="btn ghost" id="clr-c" style="display:none">Xóa danh sách</button>
+      <p class="note">Công thức xẻ cuộn: <b>độ dày × độ rộng dải lỗi × khối lượng riêng của đồng × 100.000 ÷ 1.000.000</b> (độ dày và độ rộng tính bằng mm, kết quả bằng kg). Đồng đỏ dùng 8,96 g/cm³. App tính chính xác rồi <b>làm tròn 2 chữ số sau dấu thập phân</b> mới hiện kết quả. Gõ dấu , hoặc . đều được.</p>
+    </div>
+    <div class="panel" id="p-h" hidden>
+      <p class="hint">Thanh: nhập độ dày (hoặc đường kính), kích thước nhỏ nhất của thanh lỗi và số thanh lỗi.</p>
+      <label for="mat-h">Vật liệu</label>
+      <select id="mat-h" class="mat"><option value="2.73" data-n="Nhôm">Nhôm (2,73 g/cm³)</option><option value="8.96" data-n="Đồng">Đồng đỏ (8,96 g/cm³)</option><option value="8.5" data-n="Đồng thau">Đồng thau / brass (8,50 g/cm³)</option><option value="8.8" data-n="Đồng thanh">Đồng thanh / bronze (8,80 g/cm³)</option><option value="7.93" data-n="Inox 304">Inox 304 (7,93 g/cm³)</option><option value="7.98" data-n="Inox 316">Inox 316 (7,98 g/cm³)</option><option value="7.7" data-n="Inox 430">Inox 430 (7,70 g/cm³)</option><option value="7.85" data-n="Thép">Thép carbon (7,85 g/cm³)</option><option value="7.2" data-n="Gang">Gang (7,20 g/cm³)</option><option value="7.14" data-n="Kẽm">Kẽm (7,14 g/cm³)</option><option value="8.9" data-n="Niken">Niken (8,90 g/cm³)</option><option value="4.51" data-n="Titan">Titan (4,51 g/cm³)</option><option value="11.34" data-n="Chì">Chì (11,34 g/cm³)</option><option value="custom" data-n="Tự nhập">Khác (tự nhập khối lượng riêng)</option></select>
+      <div id="drw-h" hidden><label for="dr-h">Khối lượng riêng</label>
+        <div class="row"><input id="dr-h" class="kp" type="text" inputmode="decimal" placeholder="vd: 7,85" autocomplete="off"><span class="unit">g/cm³</span></div></div>
+      <label for="dt-h">Độ dày</label>
+      <div class="row"><input id="dt-h" class="kp" type="text" inputmode="decimal" placeholder="vd: 2" autocomplete="off"><span class="unit">mm</span></div>
+      <label for="dm-h">Kích thước nhỏ nhất</label>
+      <div class="row"><input id="dm-h" class="kp" type="text" inputmode="decimal" placeholder="vd: 150" autocomplete="off"><select id="dmu-h"><option value="1" selected>mm</option><option value="10">cm</option><option value="1000">m</option></select></div>
+      <label for="dn-h">Số thanh lỗi</label>
+      <div class="qrow"><input id="dn-h" class="kp" data-int="1" type="text" inputmode="numeric" value="1" autocomplete="off"></div>
+      <div class="res2"><div class="bx tot"><b>Khối lượng lỗi trách nhiệm</b><span class="bn" id="tot-h">–</span><small>kg · làm tròn 2 số thập phân</small><button type="button" class="cp" data-c="h">Sao chép</button></div></div>
+      <p class="calc" id="calc-h"></p>
+      <button type="button" class="btn" id="add-h" disabled>+ Thêm vào danh sách</button>
+      <div class="list" id="list-h"></div>
+      <button type="button" class="btn ghost" id="clr-h" style="display:none">Xóa danh sách</button>
+      <p class="note">Công thức: <b>10 × độ dày × kích thước nhỏ nhất × số lượng lỗi × khối lượng riêng ÷ 1.000.000</b> (độ dày tính bằng mm, kích thước nhỏ nhất chọn mm, cm hoặc m, kết quả bằng kg). Nhôm dùng 2,73 g/cm³. App tính chính xác rồi <b>làm tròn 2 chữ số sau dấu thập phân</b> mới hiện kết quả, số hiện ra là số để nhập luôn. Gõ dấu , hoặc . đều được.</p>
+    </div>
+    <div class="decsw" role="group" aria-label="Dấu thập phân của kết quả"><span>Dấu thập phân:</span><button type="button" id="dec-dot" class="on">Chấm ( . )</button><button type="button" id="dec-com">Phẩy ( , )</button></div>
+    
+  </section>
+  </div></div>
+  <details>
+    <summary>Xem bảng tra</summary>
+    <div class="tw"><table id="tbl"></table></div>
+  </details>
+<details id="guide">
+    <summary>Hướng dẫn cài ra màn hình chính (có hình)</summary>
+    <div class="gtabs" id="gtabs"><button type="button" data-k="android">Android</button><button type="button" data-k="ios">iPhone</button><button type="button" data-k="pc">Máy tính</button></div>
+    <div id="gbody"></div>
+  </details>
+  <p class="dev"><span class="nm">Phát triển bởi Đào Duy Thanh</span> <a href="tel:0968311286">0968 311 286</a></p>
+</main>
+<div class="kp-sheet" id="kp" hidden aria-label="Bàn phím số">
+  <div class="kp-in">
+    <div class="kp-top"><div><div class="kp-lab" id="kpl"></div><div class="kp-val" id="kpv"></div></div><div class="kp-live" id="kpr"></div></div>
+    <div class="kp-grid">
+      <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button><button type="button" class="f" data-k="bs" aria-label="Xóa lùi">⌫</button>
+      <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button><button type="button" class="f" data-k="," aria-label="Dấu phẩy">,</button>
+      <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button><button type="button" class="f" data-k="." aria-label="Dấu chấm">.</button>
+      <button type="button" class="f" data-k="c" style="font-size:20px">Xóa</button><button type="button" data-k="0">0</button><button type="button" class="go" id="kpgo">Tiếp ›</button>
+    </div>
+  </div>
+</div>
+<script>
+// [giới hạn trên của lô, mã II, mã S-2]
+var ROWS=[[8,'A','A'],[15,'B','A'],[25,'C','A'],[50,'D','B'],[90,'E','B'],[150,'F','B'],
+[280,'G','C'],[500,'H','C'],[1200,'J','C'],[3200,'K','D'],[10000,'L','D'],[35000,'M','D'],
+[150000,'N','E'],[500000,'P','E'],[Infinity,'Q','E']];
+var SIZE={A:2,B:3,C:5,D:8,E:13,F:20,G:32,H:50,J:80,K:125,L:200,M:315,N:500,P:800,Q:1250};
+var LO=[2,9,16,26,51,91,151,281,501,1201,3201,10001,35001,150001,500001];
+
+function find(n){for(var i=0;i<ROWS.length;i++){if(n<=ROWS[i][0])return i}return ROWS.length-1}
+function fmt(n){return n.toLocaleString('vi-VN')}
+
+var q=document.getElementById('qty'),err=document.getElementById('err');
+var tbl=document.getElementById('tbl');
+var h='<tr><th>Cỡ lô</th><th>Ngoại quan</th><th>Kích thước</th></tr>';
+ROWS.forEach(function(r,i){
+  var rng=r[0]===Infinity?fmt(LO[i])+'+':fmt(LO[i])+'–'+fmt(r[0]);
+  h+='<tr data-i="'+i+'"><td>'+rng+'</td><td>'+SIZE[r[1]]+'</td><td>'+SIZE[r[2]]+'</td></tr>';
+});
+tbl.innerHTML=h;
+
+function calc(){
+  var raw=q.value.replace(/\D/g,'');
+  Array.prototype.forEach.call(tbl.querySelectorAll('tr.on'),function(t){t.classList.remove('on')});
+  if(!raw){err.textContent='';set('–','–','–','–');return}
+  var n=parseInt(raw,10);
+  q.value=fmt(n);
+  if(n<1){err.textContent='Số lượng phải từ 1 trở lên.';set('–','–','–','–');return}
+  err.textContent='';
+  var i=find(n),r=ROWS[i];
+  var ap=Math.min(SIZE[r[1]],n),kt=Math.min(SIZE[r[2]],n);
+  set(ap,kt,r[1],r[2]);
+  var row=tbl.querySelector('tr[data-i="'+i+'"]');if(row)row.classList.add('on');
+}
+function set(ap,kt,ca,ck){
+  document.getElementById('ap').textContent=ap;
+  document.getElementById('kt').textContent=kt;
+  document.getElementById('apc').textContent='Mức II · mã '+ca;
+  document.getElementById('ktc').textContent='Mức S-2 · mã '+ck;
+}
+q.addEventListener('input',calc);
+
+// ===== Khối lượng lỗi: 3 tab Tấm / Cuộn / Thanh, cùng công thức lỗi =====
+// kg = 10 × độ dày(mm) × kích thước nhỏ nhất(mm) × số lượng lỗi × khối lượng riêng(g/cm³) ÷ 1.000.000
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  var DEC='.',P={};
+  try{var sv=localStorage.getItem('aql-dec');if(sv===','||sv==='.')DEC=sv}catch(e){}
+  // đọc số: chấp nhận cả dấu , và dấu . làm dấu thập phân
+  function num(s){s=String(s).replace(/\s/g,'').replace(',','.');var v=parseFloat(s);return isFinite(v)&&v>0?v:NaN}
+  function r2(x){return Math.round(x*100+1e-7)/100}                       // làm tròn 2 số (bù sai số máy tính)
+  function fa(x){return r2(x).toFixed(2).replace('.',DEC)}                 // số để nhập: 12.35 hoặc 12,35
+  function f4(x){return String(Math.round(x*1e4)/1e4).replace('.',DEC)}    // số trong dòng công thức
+  function copy(text,btn){
+    var done=function(){if(!btn)return;var o=btn.textContent;btn.textContent='Đã chép ✓';setTimeout(function(){btn.textContent=o},1200)};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done,function(){fb()})}else fb();
+    function fb(){var t=document.createElement('textarea');t.value=text;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();try{document.execCommand('copy');done()}catch(e){}document.body.removeChild(t)}
+  }
+  function init(k,kind){
+    var g=function(n){return $(n+'-'+k)},items=[],cur=null;
+    function rho(){var v=g('mat').value;return v==='custom'?num(g('dr').value):parseFloat(v)}
+    function clear(){cur=null;g('tot').textContent='–';g('calc').textContent='';g('add').disabled=true}
+    function run(){
+      g('drw').hidden=g('mat').value!=='custom';
+      var T=num(g('dt').value),M=num(g('dm').value)*parseFloat(g('dmu').value),R=rho();
+      if(k==='c'){   // xẻ cuộn: độ dày × độ rộng dải lỗi × khối lượng riêng (đồng) × 100.000 ÷ 1.000.000
+        if(!isFinite(T)||!isFinite(M)||!isFinite(R)){clear();return}
+        var wc=T*M*R*100000/1e6,rc=r2(wc);
+        g('tot').textContent=fa(rc);
+        g('calc').textContent=f4(T)+' × '+f4(M)+' × '+f4(R)+' × 100.000 ÷ 1.000.000 = '+f4(wc)+' kg  →  làm tròn '+fa(rc)+' kg';
+        cur={mn:g('mat').selectedOptions[0].dataset.n,desc:'dày '+f4(T)+' mm × rộng dải lỗi '+f4(M)+' mm',wt:rc};
+        g('add').disabled=false;return;
+      }
+      var n=parseInt(g('dn').value.replace(/\D/g,''),10);
+      if(!isFinite(T)||!isFinite(M)||!isFinite(R)||!(n>=1)){clear();return}
+      var w=10*T*M*n*R/1e6,rt=r2(w);
+      g('tot').textContent=fa(rt);
+      g('calc').textContent='10 × '+f4(T)+' × '+f4(M)+' × '+n+' × '+f4(R)+' ÷ 1.000.000 = '+f4(w)+' kg  →  làm tròn '+fa(rt)+' kg';
+      cur={mn:g('mat').selectedOptions[0].dataset.n,desc:'dày '+f4(T)+' mm × nhỏ nhất '+f4(M)+' mm × '+n+' '+kind,wt:rt};
+      g('add').disabled=false;
+    }
+    function sum(){var s=0;items.forEach(function(it){s+=it.wt});return r2(s)}
+    function render(){
+      var h='';
+      items.forEach(function(it,i){
+        h+='<div class="li"><span>'+it.mn+' · '+it.desc+'<br><b style="font-size:19px">'+fa(it.wt)+' kg</b></span><button type="button" class="c" data-cp="'+i+'">Chép</button><button type="button" class="x" data-i="'+i+'" aria-label="Xóa">✕</button></div>';
+      });
+      if(items.length)h+='<div class="sum"><span>Tổng cộng</span><span>'+fa(sum())+' kg<button type="button" class="cp2" data-cps="1">Chép</button></span></div>';
+      g('list').innerHTML=h;g('clr').style.display=items.length?'block':'none';
+    }
+    // chỉ cho gõ số và dấu , . (khi dùng bàn phím máy tính)
+    ['dt','dm','dr'].forEach(function(n){g(n).addEventListener('input',function(){
+      var v=this.value.replace(/[^0-9.,]/g,''),m=v.search(/[.,]/);
+      if(m>=0)v=v.slice(0,m+1)+v.slice(m+1).replace(/[.,]/g,'');
+      if(v!==this.value)this.value=v;
+    })});
+    ['dt','dm','dr','dn'].forEach(function(n){var e=g(n);if(e)e.addEventListener('input',run)});
+    ['mat','dmu'].forEach(function(n){g(n).addEventListener('change',run)});
+    g('add').addEventListener('click',function(){
+      if(!cur)return;items.push(cur);render();g('dm').value='';if(g('dn'))g('dn').value='1';
+      if(!(window.matchMedia&&matchMedia('(pointer:coarse)').matches))g('dm').focus();
+      run();
+    });
+    g('clr').addEventListener('click',function(){items=[];render()});
+    g('list').addEventListener('click',function(e){
+      var b=e.target.closest('button');if(!b)return;
+      if(b.dataset.i!==undefined){items.splice(+b.dataset.i,1);render()}
+      else if(b.dataset.cp!==undefined){copy(fa(items[+b.dataset.cp].wt),b)}
+      else if(b.dataset.cps){copy(fa(sum()),b)}
+    });
+    document.querySelector('#p-'+k+' .cp').addEventListener('click',function(){if(cur)copy(fa(cur.wt),this)});
+    P[k]={run:run,render:render};run();
+  }
+  $('mat-t').value='2.73';$('mat-c').value='8.96';$('mat-h').value='7.93';   // Tấm = nhôm, Cuộn = đồng, Thanh = inox (đổi được)
+  init('t','tấm');init('c','cuộn');init('h','thanh');
+  // đổi tab: chỉ hiện phần của sản phẩm đó
+  function show(k){
+    Object.keys(P).forEach(function(x){$('p-'+x).hidden=x!==k;$('k-'+x).classList.toggle('on',x===k);$('k-'+x).setAttribute('aria-selected',x===k)});
+    $('calc').setAttribute('data-k',k);try{if(navigator.vibrate)navigator.vibrate(8)}catch(e){}
+  }
+  Object.keys(P).forEach(function(k){$('k-'+k).addEventListener('click',function(){show(k)})});
+  function setDec(d){
+    DEC=d;$('dec-dot').classList.toggle('on',d==='.');$('dec-com').classList.toggle('on',d===',');
+    try{localStorage.setItem('aql-dec',d)}catch(e){}
+    Object.keys(P).forEach(function(k){P[k].run();P[k].render()});
+  }
+  $('dec-dot').addEventListener('click',function(){setDec('.')});
+  $('dec-com').addEventListener('click',function(){setDec(',')});
+  $('dec-dot').classList.toggle('on',DEC==='.');$('dec-com').classList.toggle('on',DEC===',');
+  Object.keys(P).forEach(function(k){P[k].run()});
+  // chặn phóng to bằng 2 ngón (iPhone)
+  ['gesturestart','gesturechange','gestureend'].forEach(function(ev){document.addEventListener(ev,function(e){e.preventDefault()})});
+})();
+
+// ===== Giọng nói: lần đầu tự phát, các lần sau chỉ phát khi người dùng bấm loa =====
+(function(){
+  var btn=document.getElementById('vbtn'),hint=document.getElementById('vhint'),lab=document.getElementById('vl');if(!btn)return;
+  var SRC='giong-noi.mp3',KEY='aql-voice-seen',au=null,store=true,seen=false,armed=false;
+  try{seen=localStorage.getItem(KEY)==='1'}catch(e){store=false}      // không ghi nhớ được -> coi như không phải lần đầu (không tự phát)
+  function markSeen(){if(!store)return;try{localStorage.setItem(KEY,'1')}catch(e){}}
+  function playing(){return !!au&&!au.paused&&!au.ended}
+  function ui(){
+    var on=playing();btn.classList.toggle('on',on);btn.setAttribute('aria-pressed',on?'true':'false');
+    btn.setAttribute('aria-label',on?'Tắt giọng nói':'Bật giọng nói');if(lab)lab.textContent=on?'Tắt tiếng':'Bật tiếng';
+  }
+  function audio(){
+    if(!au){au=new Audio(SRC);au.preload='auto';
+      ['play','pause','ended'].forEach(function(ev){au.addEventListener(ev,ui)});
+      au.addEventListener('playing',function(){markSeen();hideHint();ui()});
+    }
+    return au;
+  }
+  function showHint(){hint.hidden=false;btn.classList.add('nudge')}
+  function hideHint(){hint.hidden=true;btn.classList.remove('nudge')}
+  function play(){
+    var a=audio();if(a.ended||(a.duration&&a.currentTime>=a.duration-.05))a.currentTime=0;
+    var p=a.play();return p&&p.then?p:Promise.resolve();
+  }
+  btn.addEventListener('click',function(e){
+    e.stopPropagation();hideHint();
+    if(playing())au.pause();else play().catch(function(){});
+  });
+  // Lần đầu truy cập: thử tự phát. Trình duyệt chặn -> phát ngay ở lần chạm đầu tiên.
+  function arm(){
+    if(armed)return;armed=true;
+    var evs=['click','touchend','keydown'];
+    function go(e){
+      if(e&&e.target&&e.target.closest&&e.target.closest('#vbtn'))return;     // bấm chính nút loa thì nút tự xử lý
+      evs.forEach(function(x){document.removeEventListener(x,go,true)});
+      play().catch(function(){});
+    }
+    evs.forEach(function(x){document.addEventListener(x,go,true)});
+  }
+  if(!seen&&store){
+    play().catch(function(){showHint();arm()});
+  }
+  document.addEventListener('visibilitychange',function(){if(document.hidden&&playing())au.pause()});
+  ui();
+})();
+
+// ===== Header 3D =====
+(function(){
+  var hero=document.getElementById('hero'),st=document.getElementById('stage');if(!hero||!st)return;
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var tx=0,ty=0,cx=0,cy=0,lastIn=-1e9,vis=true,run=false,asked=false;
+  function clamp(v){return Math.max(-1,Math.min(1,v))}
+  function point(e){var r=hero.getBoundingClientRect(),p=(e.touches&&e.touches[0])||e;
+    ty=clamp(((p.clientX-r.left)/r.width-.5)*2);tx=clamp(((p.clientY-r.top)/r.height-.5)*2);lastIn=performance.now()}
+  hero.addEventListener('pointermove',point,{passive:true});
+  hero.addEventListener('pointerdown',function(e){
+    point(e);
+    // iPhone cần bấm cho phép cảm biến nghiêng (một lần)
+    if(!asked&&window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==='function'){
+      asked=true;DeviceOrientationEvent.requestPermission().then(function(r){if(r==='granted')listenTilt()}).catch(function(){});
+    }
+  },{passive:true});
+  hero.addEventListener('pointerleave',function(){lastIn=-1e9},{passive:true});
+  function listenTilt(){window.addEventListener('deviceorientation',function(e){
+    if(e.gamma==null)return;ty=clamp(e.gamma/28);tx=clamp(((e.beta||0)-50)/28);lastIn=performance.now()},{passive:true})}
+  if(window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission!=='function')listenTilt();
+  function frame(t){
+    if(!run)return;
+    var live=t-lastIn<2500,gy,gx;
+    if(live){gy=ty;gx=tx}else{gy=Math.sin(t/2600)*.7;gx=Math.cos(t/3400)*.35}
+    cx+=(gx-cx)*.08;cy+=(gy-cy)*.08;
+    var bob=Math.sin(t/1700)*2;
+    st.style.transform='translateY('+bob.toFixed(2)+'px) rotateX('+(-cx*6).toFixed(2)+'deg) rotateY('+(cy*11).toFixed(2)+'deg)';
+    requestAnimationFrame(frame);
+  }
+  function start(){if(reduce||run||!vis||document.hidden)return;run=true;requestAnimationFrame(frame)}
+  function stop(){run=false}
+  if('IntersectionObserver' in window){new IntersectionObserver(function(es){vis=es[0].isIntersecting;vis?start():stop()}).observe(hero)}
+  document.addEventListener('visibilitychange',function(){document.hidden?stop():start()});
+  start();
+})();
+
+// ===== Bàn phím số riêng (có cả dấu , và .) =====
+(function(){
+  var coarse=window.matchMedia&&matchMedia('(pointer:coarse)').matches;
+  var kp=document.getElementById('kp');if(!kp)return;
+  var $=function(id){return document.getElementById(id)};
+  var fields=[].slice.call(document.querySelectorAll('input.kp')),act=null,fresh=false;
+  if(!coarse){fields.forEach(function(f){if(f.dataset.int==='1')f.setAttribute('inputmode','numeric')});return}  // máy tính: gõ bình thường
+  fields.forEach(function(f){
+    f.setAttribute('inputmode','none');f.readOnly=true;
+    var go=function(){open(f)};f.addEventListener('focus',go);f.addEventListener('click',go);
+  });
+  function labelOf(f){
+    var l=document.querySelector('label[for="'+f.id+'"]');var t=l?l.textContent:'';
+    var row=f.parentNode,u=row&&row.querySelector('select,.unit');
+    if(u)t+=' ('+(u.tagName==='SELECT'?u.selectedOptions[0].text:u.textContent)+')';
+    return t;
+  }
+  function liveText(f){
+    if(f.id==='qty'){var a=$('ap').textContent,k=$('kt').textContent;return a==='–'?'':'NQ '+a+' · KT '+k}
+    var c=f.closest('.panel')||f.closest('.card'),n=c&&c.querySelector('.bx.tot .bn'),t=n?n.textContent:'–';return t==='–'?'':'Tổng '+t+' kg';
+  }
+  function visibleFields(f){var card=f.closest('.card');return fields.filter(function(x){return x.closest('.card')===card&&!x.closest('[hidden]')})}
+  function refresh(){
+    if(!act)return;
+    $('kpl').textContent=labelOf(act);$('kpv').textContent=act.value||'0';$('kpr').textContent=liveText(act);
+    $('kpr').style.display=$('kpr').textContent?'':'none';
+    var list=visibleFields(act),i=list.indexOf(act);
+    $('kpgo').textContent=i>=0&&i<list.length-1?'Tiếp ›':'Xong ✓';
+    var int=act.dataset.int==='1';
+    kp.querySelector('[data-k=","]').disabled=int;kp.querySelector('[data-k="."]').disabled=int;
+  }
+  function open(f){
+    if(act&&act!==f)act.classList.remove('kp-on');
+    var changed=act!==f;act=f;f.classList.add('kp-on');
+    if(changed||kp.hidden)fresh=true;           // gõ số đầu tiên sẽ thay giá trị cũ
+    kp.hidden=false;document.body.classList.add('kpo');refresh();
+    if(changed)setTimeout(function(){try{f.scrollIntoView({block:'center',behavior:'smooth'})}catch(e){}},60);
+  }
+  function close(){
+    if(act)act.classList.remove('kp-on');act=null;kp.hidden=true;document.body.classList.remove('kpo');
+    if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
+  }
+  function fire(){act.dispatchEvent(new Event('input',{bubbles:true}));refresh()}
+  function press(k){
+    if(!act)return;
+    var v=act.value,int=act.dataset.int==='1';
+    if(k==='bs'){fresh=false;v=v.slice(0,-1)}
+    else if(k==='c'){fresh=false;v=''}
+    else if(k===','||k==='.'){
+      if(int)return;if(fresh){v='';fresh=false}
+      if(/[.,]/.test(v))return;if(v==='')v='0';v+=k;
+    }else{
+      if(fresh){v='';fresh=false}
+      if(v.replace(/\D/g,'').length>=12)return;
+      v=(v==='0')?k:v+k;
+    }
+    act.value=v;fire();
+  }
+  kp.addEventListener('click',function(e){
+    var b=e.target.closest('button');if(!b)return;
+    if(!act)return;
+    if(b.id==='kpgo'){
+      var list=visibleFields(act),i=list.indexOf(act);
+      if(i>=0&&i<list.length-1)open(list[i+1]);else close();
+      return;
+    }
+    press(b.dataset.k);
+  });
+  kp.addEventListener('pointerdown',function(e){e.preventDefault()});   // giữ nguyên vị trí cuộn
+  document.addEventListener('pointerdown',function(e){
+    if(kp.hidden)return;
+    if(kp.contains(e.target)||e.target.closest('input.kp')||e.target.closest('label'))return;
+    close();
+  });
+})();
+</script>
+<script>
+(function(){
+var K='#0b2a55',B='#1677ff',H='#ff5a1f',G='#e6eef8',U='aqlchecker-thanh.netlify.app';
+function R(x,y,w,h,r,f,s,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+r+'" fill="'+f+'"'+(s?' stroke="'+s+'" stroke-width="'+(sw||1.5)+'"':'')+'/>';}
+function T(x,y,s,t,f,a,w){return '<text x="'+x+'" y="'+y+'" font-size="'+s+'" fill="'+(f||K)+'"'+(a?' text-anchor="'+a+'"':'')+(w?' font-weight="'+w+'"':'')+'>'+t+'</text>';}
+function C(x,y,r,f){return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+f+'"/>';}
+function ring(x,y,w,h,r){return '<rect class="hl" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+(r||10)+'" fill="none" stroke="'+H+'" stroke-width="3"/>';}
+function I(x,y,s){return '<image href="icon-192.png" x="'+x+'" y="'+y+'" width="'+s+'" height="'+s+'"/>';}
+function S(w,h,x,c){return '<svg class="'+(c||'')+'" viewBox="0 0 '+w+' '+h+'" font-family="system-ui,-apple-system,Segoe UI,sans-serif" role="img" xmlns="http://www.w3.org/2000/svg">'+x+'</svg>';}
+function ph(x){return S(210,300,R(5,5,200,290,26,'#fff',K,3)+x);}
+function dim(){return R(7,7,196,286,24,'#8aa3c4');}
+function page(y){return R(18,y,174,38,10,B)+R(18,y+46,174,56,8,'#e8f1ff')+R(18,y+110,174,56,8,'#d9f5f2');}
+function home(){var s=R(7,7,196,286,24,'#cfe7ff'),i;for(i=0;i<12;i++){if(i===5)continue;s+=R(22+(i%4)*46,40+((i/4)|0)*62,34,34,9,'rgba(255,255,255,.75)');}
+return s+I(68,102,34)+ring(63,97,44,44,12)+T(85,150,8,'AQL tra cứu',K,'middle',700);}
+/* Android */
+function abar(){return R(14,22,150,26,13,G)+T(24,39,8.5,U)+C(186,29,2,K)+C(186,35,2,K)+C(186,41,2,K);}
+function menu(){var r=['Thẻ mới','Thẻ ẩn danh mới','Lịch sử','Tải xuống','Dấu trang','Cài đặt ứng dụng','Chia sẻ…'],s=R(62,52,140,196,10,'#fff',K,2),i;
+for(i=0;i<r.length;i++){if(i===5)s+=R(66,56+i*26,132,24,6,'#fff1e8',H,2);s+=T(74,72+i*26,9,r[i],K,null,i===5?700:400);}return s;}
+var A=[ph(abar()+page(62)+ring(10,19,158,32,16)),
+ph(abar()+page(62)+ring(174,20,24,26,12)),
+ph(abar()+page(62)+menu()),
+ph(dim()+R(22,90,166,124,14,'#fff',K,2)+I(34,104,34)+T(76,118,10,'Cài đặt ứng dụng?',K,null,700)+T(76,134,8.5,'AQL tra cứu','#4f6f9c')+R(36,172,64,28,14,'#fff',B)+T(68,190,10,'Hủy',B,'middle',600)+R(108,172,70,28,14,B)+T(143,190,10,'Cài đặt','#fff','middle',700)+ring(104,168,78,36,18)),
+ph(home())];
+/* iPhone */
+function sbar(){return R(14,224,182,24,12,G)+T(105,240,8.5,U,K,'middle');}
+function share(){return '<g fill="none" stroke="'+K+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M105 258v14M100 263l5-5 5 5M98 267h-3v12h20v-12h-3"/></g>';}
+function itool(){return T(30,276,16,'‹')+T(64,276,16,'›')+share()+R(140,265,14,12,2,'none',K,1.8)+R(172,266,13,11,3,'none',K,1.8);}
+function sheet(){var r=['Sao chép','Thêm vào Dấu trang','Thêm vào MH chính','Tìm trên trang'],s=R(7,78,196,215,24,'#f4f6fa')+T(105,100,9,'AQL tra cứu',K,'middle',700)+T(105,111,7,U,'#4f6f9c','middle'),i;
+for(i=0;i<4;i++){s+=R(18,120+i*40,174,34,10,i===2?'#fff1e8':'#fff',i===2?H:null,2)+T(30,141+i*40,9.5,r[i],K,null,i===2?700:400);}return s;}
+var P=[ph(page(24)+sbar()+itool()+ring(10,221,190,30,15)),
+ph(page(24)+sbar()+itool()+ring(88,252,34,32,16)),
+ph(dim()+sheet()),
+ph(dim()+R(7,40,196,253,24,'#f4f6fa')+T(24,66,10,'Hủy',B)+T(105,66,9.5,'Thêm vào MH chính',K,'middle',700)+T(188,66,10.5,'Thêm',B,'end',700)+ring(156,50,40,24,12)+R(18,86,174,70,10,'#fff')+I(28,98,44)+T(82,116,10,'AQL tra cứu',K,null,700)+T(82,132,7,U,'#4f6f9c')),
+ph(home())];
+/* Máy tính */
+function wbar(){return R(4,4,312,34,10,G)+C(20,21,4,'#ff5f57')+C(33,21,4,'#febc2e')+C(46,21,4,'#28c840')+R(60,10,196,22,11,'#fff')+T(72,25,8.5,U)+'<g fill="none" stroke="'+K+'" stroke-width="1.6" stroke-linecap="round"><rect x="263" y="15" width="14" height="10" rx="2"/><path d="M270 17v6M267 21l3 3 3-3"/></g>'+C(298,17,1.6,K)+C(298,22,1.6,K)+C(298,27,1.6,K);}
+function wpage(){return R(20,52,280,26,8,B)+R(20,88,136,90,8,'#e8f1ff')+R(164,88,136,90,8,'#d9f5f2');}
+function win(x){return S(320,200,R(4,4,312,192,10,'#fff',K,3)+wbar()+wpage()+x,'w');}
+var D=[win(ring(58,8,200,26,13)),
+win(ring(258,10,24,24,12)+R(196,42,110,22,6,H)+T(251,57,8.5,'Bấm vào đây','#fff','middle',700)),
+win(R(170,40,142,100,10,'#fff',K,2)+I(180,50,26)+T(212,62,9,'Cài đặt ứng dụng?',K,null,700)+T(212,74,7.5,'AQL tra cứu','#4f6f9c')+R(190,104,50,24,12,'#fff',B)+T(215,120,9,'Hủy',B,'middle',600)+R(246,104,58,24,12,B)+T(275,120,9,'Cài đặt','#fff','middle',700)+ring(242,100,66,32,16)),
+S(320,200,R(4,4,312,192,10,'#cfe7ff',K,3)+R(80,30,180,110,8,'#fff',K,2)+R(80,30,180,18,8,B)+R(92,58,156,22,6,'#e8f1ff')+R(92,88,156,40,6,'#d9f5f2')+I(24,24,34)+ring(19,19,44,44,10)+T(41,76,8,'AQL tra cứu',K,'middle',700)+R(4,168,312,28,10,K)+I(150,171,22),'w')];
+var TX={
+android:[['Mở link bằng Chrome','Mở ứng dụng Chrome, dán link vào thanh địa chỉ rồi bấm Enter. Đừng mở từ Zalo hay Messenger vì sẽ không cài được.'],['Bấm nút 3 chấm ⋮','Ở góc trên bên phải màn hình có nút 3 chấm dọc. Bấm vào đó để mở menu.'],['Chọn "Cài đặt ứng dụng"','Trong menu, tìm dòng "Cài đặt ứng dụng" (hoặc "Thêm vào màn hình chính") rồi bấm vào.'],['Bấm "Cài đặt"','Máy hỏi lại một lần, bấm nút xanh "Cài đặt". Nếu hiện thêm bảng "Thêm", bấm "Thêm".'],['Xong!','Biểu tượng ORISTAR đã nằm ở màn hình chính. Bấm vào là mở app như ứng dụng thật.']],
+ios:[['Mở link bằng Safari','Dùng Safari (biểu tượng la bàn xanh). Nếu dùng Chrome trên iPhone, nút Chia sẻ nằm ngay trong thanh địa chỉ, bên phải link.'],['Bấm nút Chia sẻ','Là hình vuông có mũi tên hướng lên, nằm ở thanh dưới cùng.'],['Chọn "Thêm vào MH chính"','Vuốt danh sách lên để tìm dòng "Thêm vào MH chính" (nằm khá thấp), rồi bấm vào.'],['Bấm "Thêm"','Bấm "Thêm" ở góc trên bên phải. Bạn có thể đổi tên app trước khi bấm.'],['Xong!','Biểu tượng ORISTAR đã nằm ở màn hình chính. Bấm vào là mở app.']],
+pc:[['Mở link bằng Chrome hoặc Edge','Dán link vào thanh địa chỉ rồi bấm Enter.'],['Bấm biểu tượng cài đặt','Ở cuối thanh địa chỉ (bên phải) có biểu tượng hình màn hình có mũi tên xuống. Nếu không thấy, bấm ⋮ → "Truyền, lưu và chia sẻ" → "Cài đặt trang dưới dạng ứng dụng".'],['Bấm "Cài đặt"','Hộp thoại hiện ra, bấm nút xanh "Cài đặt".'],['Xong!','App mở thành cửa sổ riêng, có biểu tượng trên Desktop và thanh taskbar.']]};
+var SV={android:A,ios:P,pc:D};
+function $(i){return document.getElementById(i);}
+var g=$('guide'),ib=$('ib'),tabs=[].slice.call(document.querySelectorAll('#gtabs button')),dp=null;
+function render(k){var h='';TX[k].forEach(function(t,i){h+='<div class="gs">'+SV[k][i]+'<h4><i>'+(i+1)+'</i>'+t[0]+'</h4><p>'+t[1]+'</p></div>';});$('gbody').innerHTML=h;tabs.forEach(function(b){b.classList.toggle('on',b.getAttribute('data-k')===k);});}
+tabs.forEach(function(b){b.onclick=function(){render(b.getAttribute('data-k'));};});
+var ua=navigator.userAgent,ios=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),and=/Android/.test(ua);
+render(ios?'ios':and?'android':'pc');
+var done=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true||/Electron/.test(ua);
+function hideBar(){ib.hidden=true;try{sessionStorage.setItem('ibNo','1');}catch(e){}}
+function openGuide(){g.open=true;g.scrollIntoView({behavior:'smooth',block:'start'});}
+function install(){if(dp){dp.prompt();dp.userChoice.then(function(c){dp=null;if(c&&c.outcome==='accepted')hideBar();});}else{openGuide();}}
+if(done){ib.hidden=true;g.hidden=true;}else{var no=false;try{no=sessionStorage.getItem('ibNo')==='1';}catch(e){}ib.hidden=no;}
+if(ios)$('ibGo').textContent='Xem cách cài';
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;$('ibGo').textContent='Cài ngay';});
+window.addEventListener('appinstalled',hideBar);
+$('ibGo').onclick=install;$('ibNo').onclick=hideBar;
+})();
+</script>
+<script>
+// Đăng ký service worker để app chạy được khi mất mạng
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
+</script>
+</body>
+</html>
