@@ -1,32 +1,36 @@
 {
   "name": "AQL-checkker",
-  "productName": "AQL Checkker",
+  "productName": "AQL Tra Cứu",
   "version": "1.0.0",
-  "description": "AQL Checkker App",
+  "description": "AQL Tra Cứu - Oristar",
+  "author": "Oristar",
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
     "build:win": "electron-builder --win nsis portable --publish never"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2"
+  },
   "devDependencies": {
-    "electron": "^31.7.0",
-    "electron-builder": "^24.13.3"
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
   },
   "build": {
-    "appId": "vn.oristar.aqlcheckker",
-    "productName": "AQL Checkker",
+    "appId": "vn.oristar.aqltracuu",
+    "productName": "AQL Tra Cứu",
     "directories": {
       "output": "dist"
     },
     "files": [
       "electron/**/*",
-      "web/**/*",
-      "icons/**/*"
+      "web/**/*"
     ],
     "win": {
       "target": ["nsis", "portable"],
-      "icon": "icons/icon.ico"
+      "icon": "electron/build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
