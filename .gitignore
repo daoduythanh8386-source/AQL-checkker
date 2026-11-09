@@ -1,0 +1,5 @@
+node_modules/
+dist/
+electron/app/
+android-app/www/
+android-app/android/
