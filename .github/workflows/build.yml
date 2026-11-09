@@ -51,6 +51,8 @@ jobs:
 
       - name: Build Android APK
         run: |
+          npx cap init "AQL Tra Cứu" vn.oristar.aqltracuu --web-dir=web --force
+          npx cap add android || true
           npx cap sync android
           cd android
           chmod +x gradlew
